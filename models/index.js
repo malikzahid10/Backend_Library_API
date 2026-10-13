@@ -17,8 +17,8 @@ Book.belongsTo(Category, {
 User.belongsToMany(Roles, { through: "User_Has_Roles" });
 Roles.belongsToMany(User, { through: "User_Has_Roles" });
 
-Roles.belongsToMany(Permission, { through: "Roles_Has_Permissions" });
-Permission.belongsToMany(Roles, { through: "Roles_Has_Permission" });
+Roles.belongsToMany(Permission, { through: "Roles_Permissions" });
+Permission.belongsToMany(Roles, { through: "Roles_Permissions" });
 
 Book.hasMany(BookTransacation);
 BookTransacation.belongsTo(Book);
