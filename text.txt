@@ -1,0 +1,41 @@
+
+const { User, Roles } = require("../models");
+
+const authorizeRoles = (requiredRoles) => {
+  return async (req, res, next) => {
+    try {
+      const user = await User.findByPk(req.user.id, {
+        include: [Roles],
+      });
+
+      if (!user || !user.isActive) {
+        return res.status(401).json({
+          message: "User not authenticated!",
+        });
+      }
+
+      const userRoles = user.Roles.map((role) => role.name);
+
+      const hasRole = userRoles.some((role) =>
+        requiredRoles.includes(role),
+      );
+
+      if (!hasRole) {
+        return res.status(403).json({
+          message: "You are not authorized to access this resource!",
+        });
+      }
+
+      next();
+    } catch (error) {
+      console.error(error);
+
+      return res.status(500).json({
+        message: "Internal Server Error",
+      });
+    }
+  };
+};
+
+module.exports = authorizeRoles;
+```

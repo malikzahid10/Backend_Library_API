@@ -1,4 +1,4 @@
-const { User } = require("../models");
+const { User, Roles, Permission } = require("../models");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 
@@ -6,7 +6,10 @@ const loginUser = async (req, res) => {
   try {
     const { email, password } = req.body;
 
-    const user = await User.findOne({ where: { email: email } });
+    const user = await User.findOne({
+      where: { email: email },
+      include: [{ model: Roles, include: [Permission] }],
+    });
 
     if (!user) {
       return res.status(401).json({
@@ -28,6 +31,17 @@ const loginUser = async (req, res) => {
       });
     }
 
+    const userRoles = [];
+    const userPermissions = [];
+
+    for (const role of user.Roles) {
+      userRoles.push(role.name);
+
+      for (const permission of role.Permissions) {
+        userPermissions.push(permission.permissions);
+      }
+    }
+
     const token = jwt.sign(
       {
         id: user.id,
@@ -38,10 +52,12 @@ const loginUser = async (req, res) => {
 
     return res.status(200).json({
       message: "Login Successfully!",
-      access_toke: token,
+      access_token: token,
       id: user.id,
       email: user.email,
       isActive: user.isActive,
+      roles: userRoles,
+      permissions: userPermissions,
     });
   } catch (error) {
     console.error(error);
