@@ -1,27 +1,44 @@
 const passport = require("passport");
 
-const { ExtractJwt, Strategy } = require("passport-jwt");
-const { User } = require("../models");
+const { Strategy, ExtractJwt } = require("passport-jwt");
+const { User, Roles, Permission } = require("../models");
+
 require("dotenv").config();
 
 passport.use(
   new Strategy(
     {
       jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
-      secretOrKey: process.env.SECRET_KEY,
+      secretOrKey: process.env.JWT_SECRET,
     },
     async (payload, done) => {
-      try {
-        const user = await User.findOne({
-          where: { id: payload.id, isActive: true },
-        });
-        if (!user) {
-          return done(null, false);
-        }
-        return done(null, payload);
-      } catch (error) {
-        return done(error, false);
+      const user = await User.findOne({
+        where: { id: payload.id, isActive: true },
+        include: [{ model: Roles, include: [Permission] }],
+      });
+
+      if (!user) {
+        return done(null, false);
       }
+
+      const roles = [];
+
+      const permissions = [];
+
+      for (const role of user.Roles) {
+        roles.push(role.name);
+
+        for (const permission of role.Permissions) {
+          permissions.push(permission.permissions);
+        }
+      }
+
+      return done(null, {
+        id: user.id,
+        email: user.email,
+        roles: roles,
+        permissions: [...new Set(permissions)],
+      });
     },
   ),
 );

@@ -7,8 +7,8 @@ const loginValidateSchema = Joi.object({
     "string.empty": "Email can not be Empty",
   }),
 
-  password: Joi.string().min(4).max(20).required().messages({
-    "string.min": "Password must be at least 4 charactors long",
+  password: Joi.string().min(8).max(20).required().messages({
+    "string.min": "Password must be at least 8 charactors long",
     "string.max": "Password length is big , Please Enter Maximum 20 Charactors",
     "any.required": " Password is Required",
     "string.empty": "Password can not be Empty",

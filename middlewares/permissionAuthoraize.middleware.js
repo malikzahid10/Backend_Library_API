@@ -1,14 +1,17 @@
-const permissionAuthoraize = (requiredPermissions) => {
+const authorizePermission = (requiredPermission) => {
   return (req, res, next) => {
     const userPermissions = req.user.permissions;
 
-    if (!userPermissions.includes(requiredPermissions)) {
+    const hasPermission = userPermissions.includes(requiredPermission);
+
+    if (!hasPermission) {
       return res.status(403).json({
-        message: "You do not have Permission",
+        message: "You do not have permission!",
       });
     }
+
     next();
   };
 };
 
-module.exports = permissionAuthoraize;
+module.exports = authorizePermission;

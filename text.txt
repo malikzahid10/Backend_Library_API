@@ -39,3 +39,62 @@ const authorizeRoles = (requiredRoles) => {
 
 module.exports = authorizeRoles;
 ```
+
+
+
+
+
+const authoraizedRoles = (requiredRoles) => {
+  return (req, res, next) => {
+    const userRoles = req.user.roles;
+    const hasRoles = userRoles.some((role) => requiredRoles.includes(role));
+
+    if (!hasRoles) {
+      return res.status(403).json({
+        message: "You are UnAuthoraize!",
+      });
+    }
+    next();
+  };
+};
+
+module.exports = authoraizedRoles;
+
+
+
+
+return async (req, res, next) => {
+    try {
+      const user = await User.findOne({
+        where: {
+          id: req.user.id,
+          isActive: true,
+        },
+        include: [Roles],
+      });
+
+      if (!user) {
+        return res.status(401).json({
+          message: "User not authenticated!",
+        });
+      }
+
+      const userRoles = user.Roles.map((role) => role.name);
+
+      const hasRole = userRoles.some((role) => requiredRoles.includes(role));
+
+      if (!hasRole) {
+        return res.status(403).json({
+          message: "You are not authorized!",
+        });
+      }
+
+      next();
+    } catch (error) {
+      console.error(error);
+
+      return res.status(500).json({
+        message: "Internal Server Error",
+      });
+    }
+  };

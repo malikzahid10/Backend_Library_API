@@ -1,15 +1,17 @@
-const authoraizedRoles = (requiredRoles) => {
+const authorizeRoles = (requiredRoles) => {
   return (req, res, next) => {
     const userRoles = req.user.roles;
-    const hasRoles = userRoles.some((role) => requiredRoles.includes(role));
 
-    if (!hasRoles) {
+    const hasRole = userRoles.some((role) => requiredRoles.includes(role));
+
+    if (!hasRole) {
       return res.status(403).json({
-        message: "You are UnAuthoraize!",
+        message: "You are not authorized!",
       });
     }
+
     next();
   };
 };
 
-module.exports = authoraizedRoles;
+module.exports = authorizeRoles;
